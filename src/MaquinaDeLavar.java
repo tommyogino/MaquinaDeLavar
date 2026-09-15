@@ -1,5 +1,6 @@
 public class MaquinaDeLavar {
 
+  //constantes
   public static final int DESLIGADA = 0;
   public static final int LIGADA = 1;
   public static final int LAVANDO = 2;
@@ -8,6 +9,7 @@ public class MaquinaDeLavar {
   public static final int CENTRIFUGANDO = 5;
   public static final int CENTRIFUGACAO_CONCLUIDA = 6;
 
+  //atributos
   private final String modelo;
   private int estado;
   private boolean tampaAberta;
@@ -16,6 +18,7 @@ public class MaquinaDeLavar {
     return estado;
   }
 
+  //metodos de consulta
   public String descricaoEstado(int estado) {
     return switch (estado) {
       case DESLIGADA -> "Desligada";
@@ -29,12 +32,14 @@ public class MaquinaDeLavar {
     };
   }
 
+  //construtor
   public MaquinaDeLavar(String modelo) {
     this.modelo = modelo;
     this.estado = DESLIGADA;
     this.tampaAberta = false;
   }
 
+  //getters and setters
   public String getDescricaoEstado() {
     return descricaoEstado(estado);
   }
@@ -67,6 +72,7 @@ public class MaquinaDeLavar {
     );
   }
 
+  //exibir status atual da maquina
   public void exibirStatus() {
     System.out.println("STATUS: " + getStatus());
   }
@@ -81,6 +87,7 @@ public class MaquinaDeLavar {
     return false;
   }
 
+  //comportamentos da maquina(ligar, desligar, lavar, centrifugar)
   public boolean ligar() {
     if (estado != DESLIGADA) {
       return recusar("ligar", "a maquina ja esta ligada");
