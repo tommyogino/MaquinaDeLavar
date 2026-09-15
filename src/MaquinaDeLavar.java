@@ -1,217 +1,161 @@
 public class MaquinaDeLavar {
 
-  //constantes
-  public static final int DESLIGADA = 0;
-  public static final int LIGADA = 1;
-  public static final int LAVANDO = 2;
-  public static final int PAUSADA = 3;
-  public static final int LAVAGEM_CONCLUIDA = 4;
-  public static final int CENTRIFUGANDO = 5;
-  public static final int CENTRIFUGACAO_CONCLUIDA = 6;
+    // Estados da maquina
+    public enum Estado {
+        DESLIGADA("Desligada"),
+        LIGADA("Ligada (ociosa)"),
+        LAVANDO("Lavando"),
+        PAUSADA("Lavagem pausada"),
+        LAVAGEM_CONCLUIDA("Lavagem concluída"),
+        CENTRIFUGANDO("Centrifugando"),
+        CENTRIFUGACAO_CONCLUIDA("Centrifugação concluída");
 
-  //atributos
-  private final String modelo;
-  private int estado;
-  private boolean tampaAberta;
+        private final String descricao;
 
-  public int getEstado() {
-    return estado;
-  }
+        Estado(String descricao) {
+            this.descricao = descricao;
+        }
 
-  //metodos de consulta
-  public String descricaoEstado(int estado) {
-    return switch (estado) {
-      case DESLIGADA -> "Desligada";
-      case LIGADA -> "Ligada (ociosa)";
-      case LAVANDO -> "Lavando";
-      case PAUSADA -> "Lavagem pausada";
-      case LAVAGEM_CONCLUIDA -> "Lavagem concluída";
-      case CENTRIFUGANDO -> "Centrifugando";
-      case CENTRIFUGACAO_CONCLUIDA -> "Centrifugacao concluida";
-      default -> "Estado desconhecido";
-    };
-  }
-
-  //construtor
-  public MaquinaDeLavar(String modelo) {
-    this.modelo = modelo;
-    this.estado = DESLIGADA;
-    this.tampaAberta = false;
-  }
-
-  //getters and setters
-  public String getDescricaoEstado() {
-    return descricaoEstado(estado);
-  }
-
-  public boolean isTampaAberta() {
-    return tampaAberta;
-  }
-
-  public boolean isLigada() {
-    return estado != DESLIGADA;
-  }
-
-  public String getModelo() {
-    return modelo;
-  }
-
-  public String getStatus() {
-    String situacaoTampa;
-    if (tampaAberta) {
-      situacaoTampa = "aberta";
-    } else {
-      situacaoTampa = "fechada";
+        public String getDescricao() {
+            return descricao;
+        }
     }
-    return (
-      modelo +
-      " | estado = " +
-      getDescricaoEstado() +
-      " | tampa = " +
-      situacaoTampa
-    );
-  }
 
-  //exibir status atual da maquina
-  public void exibirStatus() {
-    System.out.println("STATUS: " + getStatus());
-  }
+    private final String modelo;
+    private Estado estado;
+    private boolean tampaAberta;
 
-  private boolean aceitar(String operacao, String mensagem) {
-    System.out.println("OK " + operacao + ": " + mensagem + ".");
-    return true;
-  }
+    public MaquinaDeLavar(String modelo) {
+        this.modelo = modelo;
+        this.estado = Estado.DESLIGADA;
+        this.tampaAberta = false;
+    }
 
-  private boolean recusar(String operacao, String motivo) {
-    System.out.println("NEGADO " + operacao + ": " + motivo + ".");
-    return false;
-  }
+    // Getters
+    public String getModelo() { return modelo; }
+    public Estado getEstado() { return estado; }
+    public boolean isTampaAberta() { return tampaAberta; }
+    public boolean isLigada() { return estado != Estado.DESLIGADA; }
 
-  //comportamentos da maquina(ligar, desligar, lavar, centrifugar)
-  public boolean ligar() {
-    if (estado != DESLIGADA) {
-      return recusar("ligar", "a maquina ja esta ligada");
+    public String getStatus() {
+        String situacaoTampa = tampaAberta ? "aberta" : "fechada";
+        return modelo + " | estado = " + estado.getDescricao() + " | tampa = " + situacaoTampa;
     }
-    estado = LIGADA;
-    return aceitar("ligar", "maquina ligada e pronta para uso");
-  }
 
-  public boolean desligar() {
-    if (estado == DESLIGADA) {
-      return recusar("desligar", "a maquina ja esta desligada");
+    public void exibirStatus() {
+        System.out.println("STATUS: " + getStatus());
     }
-    if (estado == LAVANDO || estado == CENTRIFUGANDO) {
-      return recusar(
-        "desligar",
-        "operacao em andamento (" + descricaoEstado(estado) + ")"
-      );
-    }
-    estado = DESLIGADA;
-    return aceitar("desligar", "maquina desligada com seguranca");
-  }
 
-  public boolean abrirTampa() {
-    if (tampaAberta) {
-      return recusar("abrir tampa", "a tampa ja esta aberta");
+    //auxiliares de resposta
+    private boolean aceitar(String operacao, String mensagem) {
+        System.out.println("OK " + operacao + ": " + mensagem + ".");
+        return true;
     }
-    if (estado == LAVANDO || estado == CENTRIFUGANDO) {
-      return recusar(
-        "abrir tampa",
-        "travada durante a operacao (" + descricaoEstado(estado) + ")"
-      );
-    }
-    tampaAberta = true;
-    return aceitar("abrir tampa", "tampa aberta");
-  }
 
-  public boolean fecharTampa() {
-    if (!tampaAberta) {
-      return recusar("fechar tampa", "a tampa ja esta fechada");
+    private boolean recusar(String operacao, String motivo) {
+        System.out.println("NEGADO " + operacao + ": " + motivo + ".");
+        return false;
     }
-    tampaAberta = false;
-    return aceitar("fechar tampa", "tampa fechada");
-  }
 
-  public boolean iniciarLavagem() {
-    if (estado == DESLIGADA) {
-      return recusar("iniciar lavagem", "a maquina esta desligada");
+    //Comportamentos
+    public boolean ligar() {
+        if (estado != Estado.DESLIGADA) {
+            return recusar("ligar", "a máquina já está ligada");
+        }
+        estado = Estado.LIGADA;
+        return aceitar("ligar", "máquina ligada e pronta para uso");
     }
-    if (tampaAberta) {
-      return recusar("iniciar lavagem", "a tampa esta aberta");
-    }
-    if (estado == LAVANDO) {
-      return recusar("iniciar lavagem", "ja existe uma lavagem em andamento");
-    }
-    if (estado == PAUSADA) {
-      return recusar("iniciar lavagem", "existe uma lavagem pausada");
-    }
-    if (estado == CENTRIFUGANDO) {
-      return recusar("iniciar lavagem", "a maquina esta centrifugando");
-    }
-    estado = LAVANDO;
-    return aceitar("iniciar lavagem", "lavagem em andamento");
-  }
 
-  public boolean pausarLavagem() {
-    if (estado == DESLIGADA) {
-      return recusar("pausar lavagem", "a maquina esta desligada");
+    public boolean desligar() {
+        if (estado == Estado.DESLIGADA) {
+            return recusar("desligar", "a máquina já está desligada");
+        }
+        if (estado == Estado.LAVANDO || estado == Estado.CENTRIFUGANDO) {
+            return recusar("desligar", "operação em andamento (" + estado.getDescricao() + ")");
+        }
+        estado = Estado.DESLIGADA;
+        return aceitar("desligar", "máquina desligada com segurança");
     }
-    if (estado != LAVANDO) {
-      return recusar("pausar lavagem", "nao ha lavagem em andamento");
-    }
-    estado = PAUSADA;
-    return aceitar("pausar lavagem", "lavagem pausada");
-  }
 
-  public boolean retomarLavagem() {
-    if (estado != PAUSADA) {
-      return recusar("retomar lavagem", "nao ha lavagem pausada");
+    public boolean abrirTampa() {
+        if (tampaAberta) {
+            return recusar("abrir tampa", "a tampa já está aberta");
+        }
+        if (estado == Estado.LAVANDO || estado == Estado.CENTRIFUGANDO) {
+            return recusar("abrir tampa", "travada durante a operação (" + estado.getDescricao() + ")");
+        }
+        tampaAberta = true;
+        return aceitar("abrir tampa", "tampa aberta");
     }
-    estado = LAVANDO;
-    return aceitar("retomar lavagem", "lavagem retomada");
-  }
 
-  public boolean concluirLavagem() {
-    if (estado != LAVANDO) {
-      return recusar("concluir lavagem", "nao ha lavagem em andamento");
+    public boolean fecharTampa() {
+        if (!tampaAberta) {
+            return recusar("fechar tampa", "a tampa já está fechada");
+        }
+        tampaAberta = false;
+        return aceitar("fechar tampa", "tampa fechada");
     }
-    estado = LAVAGEM_CONCLUIDA;
-    return aceitar(
-      "concluir lavagem",
-      "lavagem finalizada; centrifugacao liberada"
-    );
-  }
 
-  public boolean iniciarCentrifugacao() {
-    if (estado == DESLIGADA) {
-      return recusar("iniciar centrifugacao", "a maquina esta desligada");
+    public boolean iniciarLavagem() {
+        if (estado == Estado.DESLIGADA) {
+            return recusar("iniciar lavagem", "a máquina está desligada");
+        }
+        if (tampaAberta) {
+            return recusar("iniciar lavagem", "a tampa está aberta");
+        }
+        if (estado != Estado.LIGADA && estado != Estado.CENTRIFUGACAO_CONCLUIDA) {
+            return recusar("iniciar lavagem", "máquina ocupada ou em estado inválido (" + estado.getDescricao() + ")");
+        }
+        estado = Estado.LAVANDO;
+        return aceitar("iniciar lavagem", "lavagem em andamento");
     }
-    if (tampaAberta) {
-      return recusar("iniciar centrifugacao", "a tampa esta aberta");
-    }
-    if (estado != LAVAGEM_CONCLUIDA) {
-      return recusar(
-        "iniciar centrifugacao",
-        "a lavagem ainda nao foi concluída (estado atual: " +
-          descricaoEstado(estado) +
-          ")"
-      );
-    }
-    estado = CENTRIFUGANDO;
-    return aceitar("iniciar centrifugacao", "centrifugacao em andamento");
-  }
 
-  public boolean concluirCentrifugacao() {
-    if (estado != CENTRIFUGANDO) {
-      return recusar(
-        "concluir centrifugacao",
-        "nao ha centrifugacao em andamento"
-      );
+    public boolean pausarLavagem() {
+        if (estado == Estado.DESLIGADA) {
+            return recusar("pausar lavagem", "a máquina está desligada");
+        }
+        if (estado != Estado.LAVANDO) {
+            return recusar("pausar lavagem", "não há lavagem em andamento");
+        }
+        estado = Estado.PAUSADA;
+        return aceitar("pausar lavagem", "lavagem pausada");
     }
-    estado = CENTRIFUGACAO_CONCLUIDA;
-    return aceitar(
-      "concluir centrifugacao",
-      "ciclo completo; a maquina pode ser aberta ou desligada"
-    );
-  }
+
+    public boolean retomarLavagem() {
+        if (estado != Estado.PAUSADA) {
+            return recusar("retomar lavagem", "não há lavagem pausada");
+        }
+        estado = Estado.LAVANDO;
+        return aceitar("retomar lavagem", "lavagem retomada");
+    }
+
+    public boolean concluirLavagem() {
+        if (estado != Estado.LAVANDO) {
+            return recusar("concluir lavagem", "não há lavagem em andamento");
+        }
+        estado = Estado.LAVAGEM_CONCLUIDA;
+        return aceitar("concluir lavagem", "lavagem finalizada; centrifugação liberada");
+    }
+
+    public boolean iniciarCentrifugacao() {
+        if (estado == Estado.DESLIGADA) {
+            return recusar("iniciar centrifugação", "a máquina está desligada");
+        }
+        if (tampaAberta) {
+            return recusar("iniciar centrifugação", "a tampa está aberta");
+        }
+        if (estado != Estado.LAVAGEM_CONCLUIDA) {
+            return recusar("iniciar centrifugação", "a lavagem ainda não foi concluída (estado atual: " + estado.getDescricao() + ")");
+        }
+        estado = Estado.CENTRIFUGANDO;
+        return aceitar("iniciar centrifugação", "centrifugação em andamento");
+    }
+
+    public boolean concluirCentrifugacao() {
+        if (estado != Estado.CENTRIFUGANDO) {
+            return recusar("concluir centrifugação", "não há centrifugação em andamento");
+        }
+        estado = Estado.CENTRIFUGACAO_CONCLUIDA;
+        return aceitar("concluir centrifugação", "ciclo completo; a máquina pode ser aberta ou desligada");
+    }
 }
